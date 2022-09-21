@@ -20,105 +20,34 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">Create table "movies_by_user"</div>
+<div class="step-title">Grouping rows</div>
 
-This next table will store information about movies that users watched, 
-such that each partition will store all movies for one particular user 
-ordered by the dates of when the user watched them. Here are 6 rows to be inserted into 2 partitions:
+Some queries may need to organize rows into groups 
+and compute aggregates for each individual group. In Cassandra, 
+grouping is always based on partition and clustering key columns and
+must follow the primary key definition order. In other words, a group 
+is always defined as a set of rows belonging to the same partition.
+Consider the following query examples.
 
-| email            | watched_on | title               | year |
-|------------------|------------|---------------------|------|
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | 2020-04-28 | Edward Scissorhands | 1990 |
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | 2020-03-08 | Alice in Wonderland | 2010 | 
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | 2020-02-13 |         Toy Story 3 | 2010 |
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | 2020-01-22 |       Despicable Me | 2010 |
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | 2019-12-30 | Alice in Wonderland | 1951 |
-| <span style="background-color:#ABEBC6">jen@datastax.com</span> | 2011-10-01 | Alice in Wonderland | 2010 |
+✅ Q1. Calculate average ratings for all movies:
+```
+SELECT   title, year,
+         AVG(CAST(rating AS FLOAT)) AS avg_rating
+FROM     ratings_by_movie
+GROUP BY title, year;
+```
 
-
-This table is for you to create!
-
-<br/>
-
-✅ Create the table:
+✅ Q2. Calculate the number of ratings per user:
 <details>
   <summary>Solution</summary>
-
+  
 ```
-CREATE TABLE IF NOT EXISTS movies_by_user (
-  email TEXT,
-  title TEXT,
-  year INT,
-  watched_on DATE,
-  PRIMARY KEY ((email), watched_on, title, year)
-) WITH CLUSTERING ORDER BY (watched_on DESC, title ASC, year ASC);
+SELECT   email, COUNT(rating) AS n
+FROM     ratings_by_user
+GROUP BY email;
 ```
 
-</details>
-
-<br/>
-
-✅ Insert the rows:
-<details>
-  <summary>Solution</summary>
-
-```
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('joe@datastax.com', '2020-01-22', 'Despicable Me', 2010);
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('joe@datastax.com', '2020-02-13', 'Toy Story 3', 2010);
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('joe@datastax.com', '2019-12-30', 'Alice in Wonderland', 1951);
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('joe@datastax.com', '2020-03-08', 'Alice in Wonderland', 2010);
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('joe@datastax.com', '2020-04-28', 'Edward Scissorhands', 1990);
-INSERT INTO movies_by_user (email, watched_on, title, year) 
-VALUES ('jen@datastax.com', '2011-10-01', 'Alice in Wonderland', 2010);
-```
-
-</details>
-
-<br/>
-
-✅ Retrieve one partition:
-<details>
-  <summary>Solution</summary>
-
-```
-SELECT * FROM movies_by_user
-WHERE email = 'joe@datastax.com';
-```
-
-</details>
-
-<br/>
-
-✅ Retrieve one partition using the reverse row ordering:
-<details>
-  <summary>Solution</summary>
-
-```
-SELECT * FROM movies_by_user
-WHERE email = 'joe@datastax.com'
-ORDER BY watched_on ASC;
-```
-
-</details>
-
-<br/>
-
-✅ Retrieve a subset of rows from one partition:
-<details>
-  <summary>Solution</summary>
-
-```
-SELECT * FROM movies_by_user
-WHERE email = 'joe@datastax.com'
-  AND watched_on > '2020-01-01';
-```
-
-</details>
+</details> 
 
 <!-- NAVIGATION -->
 <div id="navigation-bottom" class="navigation-bottom">

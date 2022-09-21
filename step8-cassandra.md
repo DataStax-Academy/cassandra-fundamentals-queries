@@ -20,67 +20,55 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">Clustering order</div>
+<div class="step-title">Using aggregates and functions</div>
 
-Besides serving as a unique row identifier within a partition, a clustering key also defines
-how rows are ordered within the same partition. In case of a composite clustering key,
-rows are first ordered by the first clustering key column, then the second one and so forth. It 
-should now be evident that `PRIMARY KEY ((email), title, year)` and `PRIMARY KEY ((email), year, title)`
-are not the same. The clustering order affects both storage and retrieval, including efficient range queries on clustering key 
-columns. Rows are always retrieved using the clustering order or its reverse.
-While the default order for each column is ascendant or `ASC`, it can be customized on a per column basis
-using the `CLUSTERING ORDER BY` clause. Check out the following example.
+CQL aggregates include `COUNT`, `SUM`, `AVG`, `MIN` and `MAX`. CQL also 
+supports many functions, of which we will showcase `CAST`, `NOW`, and `TODATE`. 
+It is also possible to create user-defined aggregates and functions using 
+statements `CREATE AGGREGATE` and `CREATE FUNCTION`. We will create a function to calculate 
+the number of days between two dates. Study and execute the following query examples.
 
-✅ Drop the existing table:
+✅ Q1. Analize ratings for the movie:
 ```
-DROP TABLE IF EXISTS ratings_by_user;
-```
-
-✅ Create the new table:
-```
-CREATE TABLE IF NOT EXISTS ratings_by_user (
-  email TEXT,
-  year INT,
-  title TEXT,
-  rating INT,
-  PRIMARY KEY ((email), year, title)
-) WITH CLUSTERING ORDER BY (year DESC, title ASC);
+SELECT COUNT(rating) AS count,
+       SUM(rating) AS sum,
+       AVG(CAST(rating AS FLOAT)) AS avg,
+       MIN(rating) AS min,
+       MAX(rating) AS max
+FROM   ratings_by_movie
+WHERE  title = 'Alice in Wonderland'
+  AND  year  = 2010;
 ```
 
-✅ Insert the rows:
+✅ Q2. Find the user name, date of joining and current date:
 ```
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('joe@datastax.com', 2010, 'Despicable Me', 5);
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('joe@datastax.com', 2010, 'Toy Story 3', 10);
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('joe@datastax.com', 1951, 'Alice in Wonderland', 7);
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('joe@datastax.com', 2010, 'Alice in Wonderland', 9);
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('joe@datastax.com', 1990, 'Edward Scissorhands', 10);
-INSERT INTO ratings_by_user (email, year, title, rating) 
-VALUES ('jen@datastax.com', 2010, 'Alice in Wonderland', 10);
+SELECT name, 
+       date_joined, 
+       TODATE(NOW()) AS date_today
+FROM   users
+WHERE  email = 'joe@datastax.com';
 ```
 
-✅ Retrieve one partition:
+✅ Q3. Calculate how many days passed since the user joined:
 ```
-SELECT * FROM ratings_by_user
-WHERE email = 'joe@datastax.com';
-```
+CREATE FUNCTION IF NOT EXISTS 
+  DAYS_BETWEEN_DATES(date1 TEXT, date2 TEXT) 
+RETURNS NULL ON NULL INPUT 
+RETURNS BIGINT 
+LANGUAGE Java AS 
+'return java.lang.Math.abs(
+   java.time.temporal.ChronoUnit.DAYS.between(
+     java.time.LocalDate.parse(date1), 
+     java.time.LocalDate.parse(date2)
+   )
+ );';
 
-✅ Retrieve one partition using the reverse row ordering:
-```
-SELECT * FROM ratings_by_user
-WHERE email = 'joe@datastax.com'
-ORDER BY year ASC, title DESC;
-```
-
-✅ Retrieve a subset of rows from one partition:
-```
-SELECT * FROM ratings_by_user
-WHERE email = 'joe@datastax.com'
-  AND year < 2000;
+SELECT name, 
+       DAYS_BETWEEN_DATES( 
+         CAST(date_joined   AS TEXT), 
+         CAST(TODATE(NOW()) AS TEXT) ) AS days
+FROM   users
+WHERE  email = 'joe@datastax.com';
 ```
 
 <!-- NAVIGATION -->

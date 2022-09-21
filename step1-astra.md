@@ -20,20 +20,21 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">Tables, columns, data types, rows, partitions, keys, ordering</div>
+<div class="step-title">Querying tables</div>
 
-A *table* in Apache Cassandra shares many similarities with a table in a relational database. It has named *columns* with *data types* and *rows* with *values*. A *primary key* uniquely identifies a row in a table. 
+CQL queries look just like SQL queries. However, while you will see familiar clauses `SELECT`, `FROM`, `WHERE`, `GROUP BY` 
+and `ORDER BY`, CQL queries are much more restrictive in what goes into those clauses. 
 
-There are also important differences. In Cassandra, on one hand, a table is a set of *rows* containing values and, on the other hand,
-a table is also a set of *partitions* containing rows. Specifically, each row belongs to exactly one partition and each partition contains one or more rows. A *primary key* consists of a mandatory *partition key* and optional *clustering key*, where
-a partition key uniquely identifies a partition in a table and a clustering key uniquely identifies a row in a partition.
+A CQL query can only retrieve data from a single table, so there are no joins, self-joins, nested queries, unions, intersections and so forth. 
+Moreover, only columns that are declared in table's `PRIMARY KEY` definition can be used to filter, group or order rows. 
+The *primary key definition order* must be respected when filtering and grouping, such that a complete partition key must be used and 
+when a clustering key column is used, any preceding clustering column in the primary key definition must also be used. 
+When ordering rows, the *clustering order* declared in the table definition must be respected. Ordering only applies to rows within a partition and can be either preserved or reversed.
 
-A table with *single-row partitions* is a table where there is exactly one row per partition. A table 
-with single-row partitions defines a primary key to be equivalent to a partition key.  
-
-A table with *multi-row partitions* is a table where there can be one or more rows per partition. A table 
-with multi-row partitions defines a primary key to be a combination of both partition and clustering keys. Rows in the 
-same partition have the same partition key values and are *ordered* based on their clustering key values using the default ascendant order.
+These restrictions ensure that your queries only use efficient data access patterns, which include *retrieving one row*, 
+*retrieving all rows or a subset of rows from one partition* and *retrieving rows from at most a few partitions*. 
+The smaller the number of partitions a query touches, the better performance and throughput can be expected. When studying 
+our query examples in this tutorial, pay attention to data access patterns they implement.
 
 <!-- NAVIGATION -->
 <div id="navigation-bottom" class="navigation-bottom">

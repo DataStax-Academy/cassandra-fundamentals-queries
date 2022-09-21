@@ -20,95 +20,93 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">Create table "movies_by_actor"</div>
+<div class="step-title">Querying table "ratings_by_movie"</div>
 
-Next, we can design another table to store the inverse relationship of movies by actors, 
-such that each partition will store all movies where a given actor performed. To define 
-this table with *multi-row partitions*, we can use `first_name` and `last_name`, which uniquely identify an actor,
-as a *composite partition key*, and `title` and `year`, which uniquely identify a movie, as a *composite clustering key*.
-We will insert 3 rows into 2 partitions:
-
-| first_name | last_name | title               | year |
-|------------|-----------|---------------------|------|
-|     <span style="background-color:#F5B7B1">Johnny</span> |  <span style="background-color:#F5B7B1">    Depp</span> | Alice in Wonderland | 2010 |
-|     <span style="background-color:#F5B7B1">Johnny</span> |  <span style="background-color:#F5B7B1">    Depp</span> | Edward Scissorhands | 1990 |
-|     <span style="background-color:#ABEBC6">  Anne</span> |  <span style="background-color:#ABEBC6">Hathaway</span> | Alice in Wonderland | 2010 |
-
-This table is for you to create!
+Table `ratings_by_movie` stores information about ratings organized by movies, 
+such that each partition contains all ratings for one particular movie. 
+This table has multi-row partitions and 
+the primary key defined as `PRIMARY KEY ((title, year), email)`. 
+Let's first retrieve all rows from the table to learn how the data looks like and then focus 
+on predicates that the primary key can support.
 
 <br/>
 
-✅ Create the table:
+✅ Q1. Retrieve all rows:
 <details>
   <summary>Solution</summary>
 
 ```
-CREATE TABLE IF NOT EXISTS movies_by_actor (
-  first_name TEXT,
-  last_name TEXT,
-  title TEXT,
-  year INT,  
-  PRIMARY KEY ((first_name, last_name), title, year)
-);
+SELECT * FROM ratings_by_movie;
 ```
 
 </details>
 
 <br/>
 
-✅ Insert the rows:
+✅ Q2. Retrieve one partition:
 <details>
   <summary>Solution</summary>
 
 ```
-INSERT INTO movies_by_actor (first_name, last_name, title, year)  
-VALUES ('Johnny', 'Depp', 'Alice in Wonderland', 2010);
-INSERT INTO movies_by_actor (first_name, last_name, title, year)   
-VALUES ('Johnny', 'Depp', 'Edward Scissorhands', 1990);
-INSERT INTO movies_by_actor (first_name, last_name, title, year)
-VALUES ('Anne', 'Hathaway', 'Alice in Wonderland', 2010);
+SELECT * FROM ratings_by_movie
+WHERE title = 'Alice in Wonderland'
+  AND year  = 2010;
 ```
 
 </details>
 
 <br/>
 
-✅ Retrieve one row:
+✅ Q3. Retrieve two partitions:
 <details>
   <summary>Solution</summary>
 
 ```
-SELECT * FROM movies_by_actor
-WHERE first_name = 'Johnny'
-  AND last_name = 'Depp'
-  AND title = 'Alice in Wonderland'
-  AND year = 2010;
+SELECT * FROM ratings_by_movie
+WHERE title = 'Alice in Wonderland'
+  AND year IN (2010, 1951);
 ```
 
 </details>
 
 <br/>
 
-✅ Retrieve one partition:
+✅ Q4. Retrieve one row:
 <details>
   <summary>Solution</summary>
 
 ```
-SELECT * FROM movies_by_actor
-WHERE first_name = 'Johnny'
-  AND last_name = 'Depp';
+SELECT * FROM ratings_by_movie
+WHERE title = 'Alice in Wonderland'
+  AND year  = 2010
+  AND email = 'joe@datastax.com';
 ```
 
 </details>
 
 <br/>
 
-✅ Retrieve all rows:
+✅ Q5 - Q6. Retrieve a subset of rows from a partition:
 <details>
-  <summary>Solution</summary>
+  <summary>Solution 1</summary>
 
 ```
-SELECT * FROM movies_by_actor;
+SELECT * FROM ratings_by_movie
+WHERE title = 'Alice in Wonderland'
+  AND year  = 2010
+  AND email IN ('jen@datastax.com', 
+                'jim@datastax.com');
+```
+
+</details>
+<details>
+  <summary>Solution 2</summary>
+
+```
+SELECT * FROM ratings_by_movie
+WHERE title = 'Alice in Wonderland'
+  AND year  = 2010
+  AND email < 'job@datastax.com';
 ```
 
 </details>

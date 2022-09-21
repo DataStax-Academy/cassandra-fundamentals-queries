@@ -20,37 +20,42 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">What tables with multi-row partitions are good for?</div>
+<div class="step-title">Setting limits</div>
 
-In Cassandra, tables are designed to support specific queries. While tables with 
-single-row partitions are usually used to store and retrieve entities,  
-tables with multi-row partitions are great for capturing relationships.
-For example, we used tables `ratings_by_user` and `ratings_by_movie` to store and query relationships like 
-*user rated many movies* and its reverse *movie was rated by many users*, respectively.
-Tables with multi-row partitions also have a greater flexibility in terms of how data
-can be retrieved, which includes equality queries, inequality or range queries, 
-and ordering queries.
+Finally, a query can limit the number of rows that can be returned.
+This is doable with clauses `PER PARTITION LIMIT` and `LIMIT`, which can be used by themselves 
+or together in the same query. 
 
-Finally, tables with multi-row partitions are also suitable for storing entities related based on some attribute values,
-such as *movies with the same title* in the example below. Of course, whether you need such a table in your data model or not
-depends on whether you need to support queries that retrieve movies based on titles.
- 
+✅ Q1. Use no limits:
 ```
-CREATE TABLE IF NOT EXISTS movies_by_title (
-  title TEXT,
-  year INT,
-  duration INT,
-  avg_rating FLOAT,
-  PRIMARY KEY ((title), year)
-) WITH CLUSTERING ORDER BY (year DESC);
+SELECT * FROM ratings_by_user
+WHERE email IN ('joe@datastax.com',
+                'jim@datastax.com');
+```
 
-INSERT INTO movies_by_title (title, year, duration, avg_rating) 
-VALUES ('Alice in Wonderland', 2010, 108, 6.00);
-INSERT INTO movies_by_title (title, year, duration, avg_rating) 
-VALUES ('Alice in Wonderland', 1951, 75, 7.08);
+✅ Q2. Use the per partition limit:
+```
+SELECT * FROM ratings_by_user
+WHERE email IN ('joe@datastax.com',
+                'jim@datastax.com')
+PER PARTITION LIMIT 2;
+```
 
-SELECT * FROM movies_by_title
-WHERE title = 'Alice in Wonderland';
+✅ Q3. Use the overall limit:
+```
+SELECT * FROM ratings_by_user
+WHERE email IN ('joe@datastax.com',
+                'jim@datastax.com')
+LIMIT 3;
+```
+
+✅ Q4. Use both limits:
+```
+SELECT * FROM ratings_by_user
+WHERE email IN ('joe@datastax.com',
+                'jim@datastax.com')
+PER PARTITION LIMIT 2
+LIMIT 3;
 ```
 
 <!-- NAVIGATION -->

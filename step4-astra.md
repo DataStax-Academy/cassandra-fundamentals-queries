@@ -20,66 +20,30 @@
 
 <!-- CONTENT -->
 
-<div class="step-title">Create table "ratings_by_user"</div>
+<div class="step-title">Querying table "users"</div>
 
-Our first table will store information about movie ratings 
-organized by users, such that each partition will store all ratings left by one 
-particular user. To define 
-this table with *multi-row partitions*, we can use `email`, which uniquely identifies a user,
-as a *simple partition key*, and `title` and `year`, which uniquely identify a movie, as a *composite clustering key*.
-We will insert 4 rows into 2 partitions:
+Table `users` stores information about users who are uniquely identified by their email addresses.
+This table has single-row partitions and 
+the primary key defined as `PRIMARY KEY ((email))`. 
+Let's first retrieve all rows from the table to learn how the data looks like and then focus 
+on predicates that the primary key can support.
 
-| email            | title               | year | rating |
-|------------------|---------------------|------|--------|
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | Alice in Wonderland | 2010 |      9 |
-| <span style="background-color:#F5B7B1">joe@datastax.com</span> | Edward Scissorhands | 1990 |     10 |
-| <span style="background-color:#AED6F1">jen@datastax.com</span> | Alice in Wonderland | 1951 |      8 |
-| <span style="background-color:#AED6F1">jen@datastax.com</span> | Alice in Wonderland | 2010 |     10 |
-
-
-<br/>
-
-✅ Create the table:
+✅ Q1. Retrieve all rows:
 ```
-DROP TABLE IF EXISTS ratings_by_user;
-CREATE TABLE IF NOT EXISTS ratings_by_user (
-  email TEXT,
-  title TEXT,
-  year INT,
-  rating INT,
-  PRIMARY KEY ((email), title, year)
-);
+SELECT * FROM users;
 ```
 
-✅ Insert the rows:
+✅ Q2. Retrieve one row/partition:
 ```
-INSERT INTO ratings_by_user (email, title, year, rating) 
-VALUES ('joe@datastax.com', 'Alice in Wonderland', 2010, 9);
-INSERT INTO ratings_by_user (email, title, year, rating)  
-VALUES ('joe@datastax.com', 'Edward Scissorhands', 1990, 10);
-INSERT INTO ratings_by_user (email, title, year, rating) 
-VALUES ('jen@datastax.com', 'Alice in Wonderland', 2010, 10);
-INSERT INTO ratings_by_user (email, title, year, rating)  
-VALUES ('jen@datastax.com', 'Alice in Wonderland', 1951, 8);
-```
-
-✅ Retrieve one row:
-```
-SELECT * FROM ratings_by_user
-WHERE email = 'joe@datastax.com'
-  AND title = 'Alice in Wonderland'
-  AND year = 2010;
-```
-
-✅ Retrieve one partition:
-```
-SELECT * FROM ratings_by_user
+SELECT * FROM users
 WHERE email = 'joe@datastax.com';
 ```
 
-✅ Retrieve all rows:
+✅ Q3. Retrieve two rows/partitions:
 ```
-SELECT * FROM ratings_by_user;
+SELECT * FROM users
+WHERE email IN ('joe@datastax.com',
+                'jen@datastax.com');
 ```
 
 <!-- NAVIGATION -->

@@ -41,22 +41,97 @@ astra setup
 astra db list
 ```
 
-✅ Create database `cassandra-fundamentals` and keyspace `ks_multi_row_partitions` if they do not exist:
+✅ Create database `cassandra-fundamentals` and keyspace `ks_queries` if they do not exist:
 ```
-astra db create cassandra-fundamentals -k ks_multi_row_partitions --if-not-exist --wait
+astra db create cassandra-fundamentals -k ks_queries --if-not-exist --wait
 ```
 
 This operation may take a bit longer when creating a new database or resuming an existing hibernated database.
 
-✅ Verify that database `cassandra-fundamentals` is `ACTIVE` and keyspace `ks_multi_row_partitions` exists:
+✅ Verify that database `cassandra-fundamentals` is `ACTIVE` and keyspace `ks_queries` exists:
 ```
 astra db get cassandra-fundamentals
 ```
 
-✅ Start the CQL shell and connect to database `cassandra-fundamentals` and keyspace `ks_multi_row_partitions`:
+✅ Start the CQL shell and connect to database `cassandra-fundamentals` and keyspace `ks_queries`:
 ```
 clear
-astra db cqlsh cassandra-fundamentals -k ks_multi_row_partitions
+astra db cqlsh cassandra-fundamentals -k ks_queries
+```
+
+✅ Create and populate the tables:
+```
+CREATE TABLE IF NOT EXISTS users (
+  email TEXT,
+  name TEXT,
+  age INT,
+  date_joined DATE,
+  PRIMARY KEY ((email))
+);
+INSERT INTO users (email, name, age, date_joined) 
+VALUES ('joe@datastax.com', 'Joe', 25, '2020-01-01');
+INSERT INTO users (email, name, age, date_joined) 
+VALUES ('jen@datastax.com', 'Jen', 27, '2020-01-01');
+INSERT INTO users (email, name, age, date_joined) 
+VALUES ('jim@datastax.com', 'Jim', 31, '2020-05-07');
+
+CREATE TABLE IF NOT EXISTS movies (
+  title TEXT,
+  year INT,
+  duration INT,
+  avg_rating FLOAT,
+  PRIMARY KEY ((title, year))
+);
+INSERT INTO movies (title, year, duration, avg_rating) 
+VALUES ('Alice in Wonderland', 2010, 108, 8.33);
+INSERT INTO movies (title, year, duration, avg_rating) 
+VALUES ('Alice in Wonderland', 1951, 75, 6.5);
+INSERT INTO movies (title, year, duration, avg_rating) 
+VALUES ('Edward Scissorhands', 1990, 98, 8.5);
+
+CREATE TABLE IF NOT EXISTS ratings_by_user (
+  email TEXT,
+  title TEXT,
+  year INT,
+  rating INT,
+  PRIMARY KEY ((email), title, year)
+) WITH CLUSTERING ORDER BY (title ASC, year DESC);
+INSERT INTO ratings_by_user (email, title, year, rating) 
+VALUES ('joe@datastax.com', 'Alice in Wonderland', 2010, 9);
+INSERT INTO ratings_by_user (email, title, year, rating)  
+VALUES ('joe@datastax.com', 'Edward Scissorhands', 1990, 10);
+INSERT INTO ratings_by_user (email, title, year, rating) 
+VALUES ('jen@datastax.com', 'Alice in Wonderland', 2010, 10);
+INSERT INTO ratings_by_user (email, title, year, rating)  
+VALUES ('jen@datastax.com', 'Alice in Wonderland', 1951, 8);
+INSERT INTO ratings_by_user (email, title, year, rating) 
+VALUES ('jim@datastax.com', 'Alice in Wonderland', 2010, 6);
+INSERT INTO ratings_by_user (email, title, year, rating)  
+VALUES ('jim@datastax.com', 'Edward Scissorhands', 1990, 7);
+INSERT INTO ratings_by_user (email, title, year, rating)  
+VALUES ('jim@datastax.com', 'Alice in Wonderland', 1951, 5);
+
+CREATE TABLE IF NOT EXISTS ratings_by_movie (
+  title TEXT,
+  year INT,
+  email TEXT,
+  rating INT,
+  PRIMARY KEY ((title, year), email)
+);
+INSERT INTO ratings_by_movie (email, title, year, rating) 
+VALUES ('joe@datastax.com', 'Alice in Wonderland', 2010, 9);
+INSERT INTO ratings_by_movie (email, title, year, rating)  
+VALUES ('joe@datastax.com', 'Edward Scissorhands', 1990, 10);
+INSERT INTO ratings_by_movie (email, title, year, rating) 
+VALUES ('jen@datastax.com', 'Alice in Wonderland', 2010, 10);
+INSERT INTO ratings_by_movie (email, title, year, rating)  
+VALUES ('jen@datastax.com', 'Alice in Wonderland', 1951, 8);
+INSERT INTO ratings_by_movie (email, title, year, rating) 
+VALUES ('jim@datastax.com', 'Alice in Wonderland', 2010, 6);
+INSERT INTO ratings_by_movie (email, title, year, rating)  
+VALUES ('jim@datastax.com', 'Edward Scissorhands', 1990, 7);
+INSERT INTO ratings_by_movie (email, title, year, rating)  
+VALUES ('jim@datastax.com', 'Alice in Wonderland', 1951, 5);
 ```
 
 <!-- NAVIGATION -->
