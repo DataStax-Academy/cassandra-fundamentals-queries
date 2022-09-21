@@ -12,8 +12,8 @@
  <a href='command:katapod.loadPage?[{"step":"step10-astra"}]'
    class="btn btn-dark navigation-top-left">⬅️ Back
  </a>
-<span class="step-count"> Step 11 of 12</span>
- <a href='command:katapod.loadPage?[{"step":"step12-astra"}]'
+<span class="step-count"> Step 11 of 11</span>
+ <a href='command:katapod.loadPage?[{"step":"finish-astra"}]'
     class="btn btn-dark navigation-top-right">Next ➡️
   </a>
 </div>
@@ -58,7 +58,7 @@ WHERE title = 'Alice in Wonderland';
  <a href='command:katapod.loadPage?[{"step":"step10-astra"}]'
    class="btn btn-dark navigation-top-left">⬅️ Back
  </a>
- <a href='command:katapod.loadPage?[{"step":"step12-astra"}]'
+ <a href='command:katapod.loadPage?[{"step":"finish-astra"}]'
     class="btn btn-dark navigation-top-right">Next ➡️
   </a>
 </div>
