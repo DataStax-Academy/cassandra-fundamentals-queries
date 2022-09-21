@@ -50,7 +50,10 @@ WHERE  email = 'joe@datastax.com';
 ```
 
 ✅ Q3. Calculate how many days passed since the user joined:
-```
+
+*User-defined functions are currently disabled in Astra DB.*
+
+<pre class="non-executable-code">
 CREATE FUNCTION IF NOT EXISTS 
   DAYS_BETWEEN_DATES(date1 TEXT, date2 TEXT) 
 RETURNS NULL ON NULL INPUT 
@@ -69,7 +72,7 @@ SELECT name,
          CAST(TODATE(NOW()) AS TEXT) ) AS days
 FROM   users
 WHERE  email = 'joe@datastax.com';
-```
+</pre>
 
 <!-- NAVIGATION -->
 <div id="navigation-bottom" class="navigation-bottom">
