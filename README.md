@@ -1,6 +1,6 @@
 # Queries in Apache Cassandra®
 
-## Learn how to retrieve data from Cassandra NoSQL database
+## Learn how to retrieve data from a Cassandra NoSQL database
 
 **In this hands-on lab, you will:**
 * Query tables using the CQL `SELECT` statement 
