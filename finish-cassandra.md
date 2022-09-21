@@ -24,10 +24,12 @@
         <br/>
         <div class="scenario-objectives">In this hands-on lab, you explored:</div>
         <ul>
-              <li><span class="scenario-objective">Tables and the CQL <code>CREATE TABLE</code> statement</span></li>
-              <li><span class="scenario-objective">Tables with <i>multi-row partitions</i></span></li>
-              <li><span class="scenario-objective">Row <i>ordering</i> within a partition</span></li>
-              <li><span class="scenario-objective">Useful CQL statements and CQL shell commands that work with tables</span></li>
+              <li><span class="scenario-objective">CQL queries and the <code>SELECT</code> statement</span></li>
+              <li><span class="scenario-objective">Efficient data access patterns</span></li>
+              <li><span class="scenario-objective">Equality and inequality predicates</span></li>
+              <li><span class="scenario-objective">Grouping rows and computing aggregates</span></li>
+              <li><span class="scenario-objective">Ordering rows based on the table clustering order</span></li>
+              <li><span class="scenario-objective">Other CQL querying capabilities</span></li>
         </ul>
         <div class="resources">Learn more about Cassandra on <a href="https://datastax.com/dev" target="_blank">datastax.com/dev</a>:</div>
         <ul>
