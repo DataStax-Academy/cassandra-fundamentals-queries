@@ -21,5 +21,5 @@ github:
     main: true
 vscode:
    extensions:
-    - https://github.com/hemidactylus/katapod/releases/download/0.6.1-multiterminals-beta2/katapod-0.6.1-multiterminals-beta2.vsix
+    - https://github.com/HadesArchitect/katapod/releases/download/nightly/katapod-nightly.vsix
 
